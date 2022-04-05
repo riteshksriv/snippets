@@ -2,8 +2,15 @@
 	"name": "iris-ritesh-test",
 	"properties": {
 		"annotations": [],
-		"runtimeState": "Stopped",
-		"pipelines": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "TestPipeline",
+					"type": "PipelineReference"
+				}
+			}
+		],
 		"type": "ScheduleTrigger",
 		"typeProperties": {
 			"recurrence": {
