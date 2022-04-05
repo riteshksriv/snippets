@@ -1,0 +1,22 @@
+{
+	"name": "EURegionDataSet",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorageIrisRitesh",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": "test",
+				"container": "adlsgen2fs"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
