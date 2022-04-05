@@ -1,0 +1,12 @@
+{
+	"name": "iris-ritesh-eu",
+	"properties": {
+		"globalParameters": {
+			"euparam": {
+				"type": "string",
+				"value": "testval"
+			}
+		}
+	},
+	"location": "germanywestcentral"
+}
