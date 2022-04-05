@@ -1,0 +1,24 @@
+{
+	"name": "irisriteshbatchROW_LS",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBatch",
+		"typeProperties": {
+			"batchUri": "https://irisriteshbatchrow.southeastasia.batch.azure.com",
+			"poolName": "test",
+			"accountName": "irisriteshbatchrow",
+			"linkedServiceName": {
+				"referenceName": "AzureBlobStorageIrisRitesh",
+				"type": "LinkedServiceReference"
+			},
+			"accessKey": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "AzureContosoKeyVault",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "irisriteshbatchROWkey"
+			}
+		}
+	}
+}
