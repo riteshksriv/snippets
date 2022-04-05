@@ -1,0 +1,91 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "iris-ritesh"
+		},
+		"AzureDataLakeStorage1_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'AzureDataLakeStorage1'"
+		},
+		"cosmos_iris_powerbi_LS_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'cosmos_iris_powerbi_LS'"
+		},
+		"iris_ritesh_blob_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'iris_ritesh_blob'"
+		},
+		"irisadlsgen2_LS_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'irisadlsgen2_LS'"
+		},
+		"AzureContosoKeyVault_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://contosoads-keyvaults.vault.azure.net/"
+		},
+		"AzureDataLakeStorage1_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://contosoads.dfs.core.windows.net"
+		},
+		"irisadlsgen2_LS_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://irisadlsgen2.dfs.core.windows.net"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "iris-ritesh_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"AzureDataLakeStorage1_accountKey": {
+						"value": "[parameters('AzureDataLakeStorage1_accountKey')]"
+					},
+					"cosmos_iris_powerbi_LS_connectionString": {
+						"value": "[parameters('cosmos_iris_powerbi_LS_connectionString')]"
+					},
+					"irisadlsgen2_LS_accountKey": {
+						"value": "[parameters('irisadlsgen2_LS_accountKey')]"
+					},
+					"iris_ritesh_blob_connectionString": {
+						"value": "[parameters('iris_ritesh_blob_connectionString')]"
+					},
+					"AzureContosoKeyVault_properties_typeProperties_baseUrl": {
+						"value": "[parameters('AzureContosoKeyVault_properties_typeProperties_baseUrl')]"
+					},
+					"AzureDataLakeStorage1_properties_typeProperties_url": {
+						"value": "[parameters('AzureDataLakeStorage1_properties_typeProperties_url')]"
+					},
+					"irisadlsgen2_LS_properties_typeProperties_url": {
+						"value": "[parameters('irisadlsgen2_LS_properties_typeProperties_url')]"
+					}
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}

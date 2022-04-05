@@ -1,0 +1,36 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "iris-ritesh"
+		},
+		"AzureDataLakeStorage1_accountKey": {
+			"value": ""
+		},
+		"cosmos_iris_powerbi_LS_connectionString": {
+			"value": ""
+		},
+		"iris_ritesh_blob_connectionString": {
+			"value": ""
+		},
+		"irisadlsgen2_LS_accountKey": {
+			"value": ""
+		},
+		"AzureContosoKeyVault_properties_typeProperties_baseUrl": {
+			"value": "https://contosoads-keyvaults.vault.azure.net/"
+		},
+		"AzureDataLakeStorage1_properties_typeProperties_url": {
+			"value": "https://contosoads.dfs.core.windows.net"
+		},
+		"irisadlsgen2_LS_properties_typeProperties_url": {
+			"value": "https://irisadlsgen2.dfs.core.windows.net"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}

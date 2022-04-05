@@ -1,0 +1,409 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "iris-ritesh"
+		},
+		"AzureDataLakeStorage1_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'AzureDataLakeStorage1'"
+		},
+		"cosmos_iris_powerbi_LS_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'cosmos_iris_powerbi_LS'"
+		},
+		"irisadlsgen2_LS_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'irisadlsgen2_LS'"
+		},
+		"iris_ritesh_blob_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'iris_ritesh_blob'"
+		},
+		"AzureContosoKeyVault_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://contosoads-keyvaults.vault.azure.net/"
+		},
+		"AzureDataLakeStorage1_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://contosoads.dfs.core.windows.net"
+		},
+		"irisadlsgen2_LS_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://irisadlsgen2.dfs.core.windows.net"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/TestPipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "TestWebHook",
+						"type": "WebHook",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"url": "https://reqres.in/",
+							"method": "POST",
+							"headers": {
+								"region": {
+									"value": "@pipeline().globalParameters.region",
+									"type": "Expression"
+								}
+							},
+							"body": {
+								"value": "@pipeline().parameters.Body",
+								"type": "Expression"
+							},
+							"timeout": "00:10:00"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"KeyVaultEndPoint": {
+						"type": "string",
+						"defaultValue": "https://contosoads-keyvaults2.vault.azure.net/"
+					},
+					"Body": {
+						"type": "object",
+						"defaultValue": {
+							"name": "morpheus",
+							"job": "leader"
+						}
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-02-13T06:30:48Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureContosoKeyVault')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('AzureContosoKeyVault_properties_typeProperties_baseUrl')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureDataLakeStorage1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('AzureDataLakeStorage1_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('AzureDataLakeStorage1_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/cosmos_iris_powerbi_LS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "CosmosDb",
+				"typeProperties": {
+					"connectionString": "[parameters('cosmos_iris_powerbi_LS_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/irisadlsgen2_LS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('irisadlsgen2_LS_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('irisadlsgen2_LS_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DataLakeGen2Dataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "irisadlsgen2_LS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"folderPath": "test",
+						"fileSystem": "adlsgen2fs"
+					}
+				},
+				"schema": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/irisadlsgen2_LS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/cosmos_iris_powerbi_Dataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "cosmos_iris_powerbi_LS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "CosmosDbSqlApiCollection",
+				"schema": {
+					"type": "object",
+					"properties": {
+						"SegmentId": {
+							"type": "string"
+						},
+						"PublishDate": {
+							"type": "string"
+						},
+						"StreamPath": {
+							"type": "string"
+						},
+						"ScriptPath": {
+							"type": "string"
+						},
+						"EntityCount": {
+							"type": "integer"
+						},
+						"JobId": {
+							"type": "string"
+						},
+						"Error": {
+							"type": "string"
+						},
+						"JobStatus": {
+							"type": "integer"
+						},
+						"IsScored": {
+							"type": "boolean"
+						},
+						"IsDynamic": {
+							"type": "boolean"
+						},
+						"IsValue": {
+							"type": "boolean"
+						},
+						"DFSPropertyName": {
+							"type": "null"
+						},
+						"ExecutionStats": {
+							"type": "object",
+							"properties": {
+								"TotalRunningTime": {
+									"type": "string"
+								},
+								"TotalCompilationTime": {
+									"type": "string"
+								},
+								"TotalQueuedTime": {
+									"type": "string"
+								},
+								"TotalYieldedTime": {
+									"type": "string"
+								},
+								"SubmitTime": {
+									"type": "string"
+								},
+								"StartTime": {
+									"type": "string"
+								},
+								"EndTime": {
+									"type": "string"
+								},
+								"InternalState": {
+									"type": "string"
+								},
+								"Priority": {
+									"type": "integer"
+								},
+								"VcPercentAllocation": {
+									"type": "integer"
+								},
+								"TokenAllocation": {
+									"type": "integer"
+								}
+							}
+						},
+						"AdditionalStats": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"StreamPath": {
+										"type": "string"
+									},
+									"EntityCount": {
+										"type": "integer"
+									},
+									"UserIdType": {
+										"type": "string"
+									}
+								}
+							}
+						},
+						"RetryCount": {
+							"type": "integer"
+						},
+						"InputStreams": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"StreamPath": {
+										"type": "string"
+									},
+									"ReferencedAttributes": {
+										"type": "string"
+									}
+								}
+							}
+						},
+						"OutputStreams": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"StreamPath": {
+										"type": "string"
+									},
+									"ReferencedAttributes": {
+										"type": "null"
+									}
+								}
+							}
+						}
+					}
+				},
+				"typeProperties": {
+					"collectionName": "SegmentStat"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/cosmos_iris_powerbi_LS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/iris_ritesh_blob')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('iris_ritesh_blob_connectionString')]",
+					"accountKey": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "AzureContosoKeyVault",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "ContosoAds"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureContosoKeyVault')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/CopyData')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "CosmosDbSqlApiSource",
+								"preferredRegions": []
+							},
+							"sink": {
+								"type": "JsonSink",
+								"storeSettings": {
+									"type": "AzureBlobFSWriteSettings"
+								},
+								"formatSettings": {
+									"type": "JsonWriteSettings"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "cosmos_iris_powerbi_Dataset",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DataLakeGen2Dataset",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-02-13T04:58:27Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/cosmos_iris_powerbi_Dataset')]",
+				"[concat(variables('factoryId'), '/datasets/DataLakeGen2Dataset')]"
+			]
+		}
+	]
+}
