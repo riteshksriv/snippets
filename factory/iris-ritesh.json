@@ -1,5 +1,13 @@
 {
 	"name": "iris-ritesh",
+	"properties": {
+		"globalParameters": {
+			"region": {
+				"type": "string",
+				"value": "row"
+			}
+		}
+	},
 	"location": "southeastasia",
 	"identity": {
 		"type": "SystemAssigned",
