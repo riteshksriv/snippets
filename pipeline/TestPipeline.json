@@ -10,6 +10,12 @@
 				"typeProperties": {
 					"url": "https://reqres.in/",
 					"method": "POST",
+					"headers": {
+						"region": {
+							"value": "@pipeline().globalParameters.region",
+							"type": "Expression"
+						}
+					},
 					"body": {
 						"value": "@pipeline().parameters.Body",
 						"type": "Expression"
