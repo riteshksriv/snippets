@@ -1,0 +1,22 @@
+{
+	"name": "EUDataSetAdls",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "irisadlsgen2_LS_EU",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": "test",
+				"container": "adlsgen2fs"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
