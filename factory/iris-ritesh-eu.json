@@ -2,9 +2,9 @@
 	"name": "iris-ritesh-eu",
 	"properties": {
 		"globalParameters": {
-			"euparam": {
+			"region": {
 				"type": "string",
-				"value": "testval"
+				"value": "EU"
 			}
 		}
 	},
