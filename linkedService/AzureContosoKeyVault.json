@@ -1,0 +1,11 @@
+{
+	"name": "AzureContosoKeyVault",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureKeyVault",
+		"typeProperties": {
+			"baseUrl": "https://contosoads-keyvaults.vault.azure.net/"
+		}
+	}
+}

@@ -1,0 +1,9 @@
+{
+	"name": "iris-ritesh",
+	"location": "southeastasia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "11bd04b9-e4b5-4755-91e8-8a571e7b0880",
+		"tenantId": "9a6eae69-8ff2-40b7-87ae-3e9cd2563d50"
+	}
+}

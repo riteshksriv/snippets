@@ -1,0 +1,142 @@
+{
+	"name": "cosmos_iris_powerbi_Dataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "cosmos_iris_powerbi_LS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "CosmosDbSqlApiCollection",
+		"schema": {
+			"type": "object",
+			"properties": {
+				"SegmentId": {
+					"type": "string"
+				},
+				"PublishDate": {
+					"type": "string"
+				},
+				"StreamPath": {
+					"type": "string"
+				},
+				"ScriptPath": {
+					"type": "string"
+				},
+				"EntityCount": {
+					"type": "integer"
+				},
+				"JobId": {
+					"type": "string"
+				},
+				"Error": {
+					"type": "string"
+				},
+				"JobStatus": {
+					"type": "integer"
+				},
+				"IsScored": {
+					"type": "boolean"
+				},
+				"IsDynamic": {
+					"type": "boolean"
+				},
+				"IsValue": {
+					"type": "boolean"
+				},
+				"DFSPropertyName": {
+					"type": "null"
+				},
+				"ExecutionStats": {
+					"type": "object",
+					"properties": {
+						"TotalRunningTime": {
+							"type": "string"
+						},
+						"TotalCompilationTime": {
+							"type": "string"
+						},
+						"TotalQueuedTime": {
+							"type": "string"
+						},
+						"TotalYieldedTime": {
+							"type": "string"
+						},
+						"SubmitTime": {
+							"type": "string"
+						},
+						"StartTime": {
+							"type": "string"
+						},
+						"EndTime": {
+							"type": "string"
+						},
+						"InternalState": {
+							"type": "string"
+						},
+						"Priority": {
+							"type": "integer"
+						},
+						"VcPercentAllocation": {
+							"type": "integer"
+						},
+						"TokenAllocation": {
+							"type": "integer"
+						}
+					}
+				},
+				"AdditionalStats": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"StreamPath": {
+								"type": "string"
+							},
+							"EntityCount": {
+								"type": "integer"
+							},
+							"UserIdType": {
+								"type": "string"
+							}
+						}
+					}
+				},
+				"RetryCount": {
+					"type": "integer"
+				},
+				"InputStreams": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"StreamPath": {
+								"type": "string"
+							},
+							"ReferencedAttributes": {
+								"type": "string"
+							}
+						}
+					}
+				},
+				"OutputStreams": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"StreamPath": {
+								"type": "string"
+							},
+							"ReferencedAttributes": {
+								"type": "null"
+							}
+						}
+					}
+				}
+			}
+		},
+		"typeProperties": {
+			"collectionName": "SegmentStat"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

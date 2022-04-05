@@ -1,0 +1,38 @@
+{
+	"name": "TestPipeline",
+	"properties": {
+		"activities": [
+			{
+				"name": "TestWebHook",
+				"type": "WebHook",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://reqres.in/",
+					"method": "POST",
+					"body": {
+						"value": "@pipeline().parameters.Body",
+						"type": "Expression"
+					},
+					"timeout": "00:10:00"
+				}
+			}
+		],
+		"parameters": {
+			"KeyVaultEndPoint": {
+				"type": "string",
+				"defaultValue": "https://contosoads-keyvaults2.vault.azure.net/"
+			},
+			"Body": {
+				"type": "object",
+				"defaultValue": {
+					"name": "morpheus",
+					"job": "leader"
+				}
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-02-13T06:30:48Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
