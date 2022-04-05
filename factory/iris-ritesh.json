@@ -5,6 +5,10 @@
 			"region": {
 				"type": "string",
 				"value": "row"
+			},
+			"anotherregion": {
+				"type": "string",
+				"value": "anotherrow"
 			}
 		}
 	},
