@@ -4,9 +4,9 @@
 		"annotations": [],
 		"type": "AzureBatch",
 		"typeProperties": {
-			"batchUri": "https://irisriteshbatcheu.germanywestcentral.batch.azure.com",
+			"batchUri": "@pipeline().globalParameters.batchURI",
 			"poolName": "testeu",
-			"accountName": "irisriteshbatcheu",
+			"accountName": "@pipeline().globalParameters.batchName",
 			"linkedServiceName": {
 				"referenceName": "irisadlsgen2_LS_EU",
 				"type": "LinkedServiceReference"
