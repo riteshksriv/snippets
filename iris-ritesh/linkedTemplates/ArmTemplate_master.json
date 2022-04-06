@@ -7,6 +7,10 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "iris-ritesh"
 		},
+		"AzureBlobStorageIrisRitesh_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorageIrisRitesh'"
+		},
 		"AzureDataLakeStorage1_accountKey": {
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'AzureDataLakeStorage1'"
@@ -35,6 +39,34 @@
 			"type": "string",
 			"defaultValue": "https://irisadlsgen2.dfs.core.windows.net"
 		},
+		"irisadlsgen2_LS_EU_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "irisadlsg2key"
+		},
+		"irisriteshbatchEU_LS_properties_typeProperties_batchUri": {
+			"type": "string",
+			"defaultValue": "@pipeline().globalParameters.batchURI"
+		},
+		"irisriteshbatchEU_LS_properties_typeProperties_poolName": {
+			"type": "string",
+			"defaultValue": "testeu"
+		},
+		"irisriteshbatchEU_LS_properties_typeProperties_accountName": {
+			"type": "string",
+			"defaultValue": "@pipeline().globalParameters.batchName"
+		},
+		"irisriteshbatchROW_LS_properties_typeProperties_batchUri": {
+			"type": "string",
+			"defaultValue": "https://irisriteshbatchrow.southeastasia.batch.azure.com"
+		},
+		"irisriteshbatchROW_LS_properties_typeProperties_poolName": {
+			"type": "string",
+			"defaultValue": "test"
+		},
+		"irisriteshbatchROW_LS_properties_typeProperties_accountName": {
+			"type": "string",
+			"defaultValue": "irisriteshbatchrow"
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -62,6 +94,9 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
+					"AzureBlobStorageIrisRitesh_connectionString": {
+						"value": "[parameters('AzureBlobStorageIrisRitesh_connectionString')]"
+					},
 					"AzureDataLakeStorage1_accountKey": {
 						"value": "[parameters('AzureDataLakeStorage1_accountKey')]"
 					},
@@ -82,6 +117,27 @@
 					},
 					"irisadlsgen2_LS_properties_typeProperties_url": {
 						"value": "[parameters('irisadlsgen2_LS_properties_typeProperties_url')]"
+					},
+					"irisadlsgen2_LS_EU_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('irisadlsgen2_LS_EU_properties_typeProperties_connectionString_secretName')]"
+					},
+					"irisriteshbatchROW_LS_properties_typeProperties_batchUri": {
+						"value": "[parameters('irisriteshbatchROW_LS_properties_typeProperties_batchUri')]"
+					},
+					"irisriteshbatchROW_LS_properties_typeProperties_poolName": {
+						"value": "[parameters('irisriteshbatchROW_LS_properties_typeProperties_poolName')]"
+					},
+					"irisriteshbatchROW_LS_properties_typeProperties_accountName": {
+						"value": "[parameters('irisriteshbatchROW_LS_properties_typeProperties_accountName')]"
+					},
+					"irisriteshbatchEU_LS_properties_typeProperties_batchUri": {
+						"value": "[parameters('irisriteshbatchEU_LS_properties_typeProperties_batchUri')]"
+					},
+					"irisriteshbatchEU_LS_properties_typeProperties_poolName": {
+						"value": "[parameters('irisriteshbatchEU_LS_properties_typeProperties_poolName')]"
+					},
+					"irisriteshbatchEU_LS_properties_typeProperties_accountName": {
+						"value": "[parameters('irisriteshbatchEU_LS_properties_typeProperties_accountName')]"
 					}
 				}
 			},

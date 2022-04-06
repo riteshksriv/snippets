@@ -5,6 +5,9 @@
 		"factoryName": {
 			"value": "iris-ritesh"
 		},
+		"AzureBlobStorageIrisRitesh_connectionString": {
+			"value": ""
+		},
 		"AzureDataLakeStorage1_accountKey": {
 			"value": ""
 		},
@@ -25,6 +28,27 @@
 		},
 		"irisadlsgen2_LS_properties_typeProperties_url": {
 			"value": "https://irisadlsgen2.dfs.core.windows.net"
+		},
+		"irisadlsgen2_LS_EU_properties_typeProperties_connectionString_secretName": {
+			"value": "irisadlsg2key"
+		},
+		"irisriteshbatchEU_LS_properties_typeProperties_batchUri": {
+			"value": "@pipeline().globalParameters.batchURI"
+		},
+		"irisriteshbatchEU_LS_properties_typeProperties_poolName": {
+			"value": "testeu"
+		},
+		"irisriteshbatchEU_LS_properties_typeProperties_accountName": {
+			"value": "@pipeline().globalParameters.batchName"
+		},
+		"irisriteshbatchROW_LS_properties_typeProperties_batchUri": {
+			"value": "https://irisriteshbatchrow.southeastasia.batch.azure.com"
+		},
+		"irisriteshbatchROW_LS_properties_typeProperties_poolName": {
+			"value": "test"
+		},
+		"irisriteshbatchROW_LS_properties_typeProperties_accountName": {
+			"value": "irisriteshbatchrow"
 		},
 		"containerUri": {
 			"value": ""

@@ -7,6 +7,10 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "iris-ritesh"
 		},
+		"AzureBlobStorageIrisRitesh_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorageIrisRitesh'"
+		},
 		"AzureDataLakeStorage1_accountKey": {
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'AzureDataLakeStorage1'"
@@ -34,6 +38,34 @@
 		"irisadlsgen2_LS_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://irisadlsgen2.dfs.core.windows.net"
+		},
+		"irisadlsgen2_LS_EU_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "irisadlsg2key"
+		},
+		"irisriteshbatchROW_LS_properties_typeProperties_batchUri": {
+			"type": "string",
+			"defaultValue": "https://irisriteshbatchrow.southeastasia.batch.azure.com"
+		},
+		"irisriteshbatchROW_LS_properties_typeProperties_poolName": {
+			"type": "string",
+			"defaultValue": "test"
+		},
+		"irisriteshbatchROW_LS_properties_typeProperties_accountName": {
+			"type": "string",
+			"defaultValue": "irisriteshbatchrow"
+		},
+		"irisriteshbatchEU_LS_properties_typeProperties_batchUri": {
+			"type": "string",
+			"defaultValue": "@pipeline().globalParameters.batchURI"
+		},
+		"irisriteshbatchEU_LS_properties_typeProperties_poolName": {
+			"type": "string",
+			"defaultValue": "testeu"
+		},
+		"irisriteshbatchEU_LS_properties_typeProperties_accountName": {
+			"type": "string",
+			"defaultValue": "@pipeline().globalParameters.batchName"
 		}
 	},
 	"variables": {
@@ -87,6 +119,19 @@
 				},
 				"annotations": [],
 				"lastPublishTime": "2022-02-13T06:30:48Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureBlobStorageIrisRitesh')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('AzureBlobStorageIrisRitesh_connectionString')]"
+				}
 			},
 			"dependsOn": []
 		},
@@ -172,6 +217,33 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/irisadlsgen2_LS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/EURegionDataSet')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorageIrisRitesh",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "test",
+						"container": "adlsgen2fs"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorageIrisRitesh')]"
 			]
 		},
 		{
@@ -344,12 +416,65 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/irisadlsgen2_LS_EU')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Adls gen 2",
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "AzureContosoKeyVault",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "[parameters('irisadlsgen2_LS_EU_properties_typeProperties_connectionString_secretName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureContosoKeyVault')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/irisriteshbatchROW_LS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBatch",
+				"typeProperties": {
+					"batchUri": "[parameters('irisriteshbatchROW_LS_properties_typeProperties_batchUri')]",
+					"poolName": "[parameters('irisriteshbatchROW_LS_properties_typeProperties_poolName')]",
+					"accountName": "[parameters('irisriteshbatchROW_LS_properties_typeProperties_accountName')]",
+					"linkedServiceName": {
+						"referenceName": "AzureBlobStorageIrisRitesh",
+						"type": "LinkedServiceReference"
+					},
+					"accessKey": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "AzureContosoKeyVault",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "irisriteshbatchROWkey"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorageIrisRitesh')]",
+				"[concat(variables('factoryId'), '/linkedServices/AzureContosoKeyVault')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/iris-ritesh-test')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"annotations": [],
-				"runtimeState": "Started",
+				"runtimeState": "Stopped",
 				"pipelines": [
 					{
 						"pipelineReference": {
@@ -366,8 +491,7 @@
 						"interval": 15,
 						"startTime": "2022-04-19T12:12:00Z",
 						"endTime": "2022-05-04T12:12:00Z",
-						"timeZone": "UTC",
-						"schedule": {}
+						"timeZone": "UTC"
 					}
 				}
 			},
@@ -435,6 +559,104 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/cosmos_iris_powerbi_Dataset')]",
 				"[concat(variables('factoryId'), '/datasets/DataLakeGen2Dataset')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/EUDataSetAdls')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "irisadlsgen2_LS_EU",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "test",
+						"container": "adlsgen2fs"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/irisadlsgen2_LS_EU')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/irisriteshbatchEU_LS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBatch",
+				"typeProperties": {
+					"batchUri": "[parameters('irisriteshbatchEU_LS_properties_typeProperties_batchUri')]",
+					"poolName": "[parameters('irisriteshbatchEU_LS_properties_typeProperties_poolName')]",
+					"accountName": "[parameters('irisriteshbatchEU_LS_properties_typeProperties_accountName')]",
+					"linkedServiceName": {
+						"referenceName": "irisadlsgen2_LS_EU",
+						"type": "LinkedServiceReference"
+					},
+					"accessKey": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "AzureContosoKeyVault",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "irisriteshbatchEUkey"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/irisadlsgen2_LS_EU')]",
+				"[concat(variables('factoryId'), '/linkedServices/AzureContosoKeyVault')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TestCommonBatch')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CommonBatch",
+						"type": "Custom",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"command": "test.exe",
+							"referenceObjects": {
+								"linkedServices": [],
+								"datasets": []
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "irisriteshbatchEU_LS",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/irisriteshbatchEU_LS')]"
 			]
 		}
 	]
