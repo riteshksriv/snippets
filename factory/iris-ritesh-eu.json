@@ -5,6 +5,10 @@
 			"region": {
 				"type": "string",
 				"value": "EU"
+			},
+			"batchURI": {
+				"type": "string",
+				"value": "https://irisriteshbatcheu.germanywestcentral.batch.azure.com"
 			}
 		}
 	},
