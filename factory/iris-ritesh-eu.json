@@ -9,6 +9,10 @@
 			"batchURI": {
 				"type": "string",
 				"value": "https://irisriteshbatcheu.germanywestcentral.batch.azure.com"
+			},
+			"batchName": {
+				"type": "string",
+				"value": "irisriteshbatcheu"
 			}
 		}
 	},
