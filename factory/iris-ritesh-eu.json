@@ -8,7 +8,7 @@
 			},
 			"batchURI": {
 				"type": "string",
-				"value": "https://irisriteshbatcheu.germanywestcentral.batch.azure.com"
+				"value": "https://irisriteshbatchrow.southeastasia.batch.azure.com"
 			},
 			"batchName": {
 				"type": "string",
@@ -16,5 +16,5 @@
 			}
 		}
 	},
-	"location": "southeastasia"
+	"location": "germanywestcentral"
 }
