@@ -4,7 +4,7 @@
 		"globalParameters": {
 			"region": {
 				"type": "string",
-				"value": "EU"
+				"value": "ROW"
 			},
 			"batchURI": {
 				"type": "string",
@@ -16,5 +16,5 @@
 			}
 		}
 	},
-	"location": "germanywestcentral"
+	"location": "southeastasia"
 }
