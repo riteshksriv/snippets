@@ -1,0 +1,147 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "iris-ritesh-eu"
+		},
+		"AzureBlobStorageIrisRitesh_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorageIrisRitesh'"
+		},
+		"AzureDataLakeStorage1_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'AzureDataLakeStorage1'"
+		},
+		"iris_ritesh_blob_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'iris_ritesh_blob'"
+		},
+		"irisadlsgen2_LS_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'irisadlsgen2_LS'"
+		},
+		"AzureContosoKeyVault_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://contosoads-keyvaults.vault.azure.net/"
+		},
+		"AzureDataLakeStorage1_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://contosoads.dfs.core.windows.net"
+		},
+		"cosmos_iris_powerbi_LS_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "ContosoAds"
+		},
+		"irisadlsgen2_LS_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://irisadlsgen2.dfs.core.windows.net"
+		},
+		"irisadlsgen2_LS_EU_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "irisadlsg2key"
+		},
+		"irisriteshbatchEU_LS_properties_typeProperties_batchUri": {
+			"type": "string",
+			"defaultValue": "@pipeline().globalParameters.batchURI"
+		},
+		"irisriteshbatchEU_LS_properties_typeProperties_poolName": {
+			"type": "string",
+			"defaultValue": "testeu"
+		},
+		"irisriteshbatchEU_LS_properties_typeProperties_accountName": {
+			"type": "string",
+			"defaultValue": "@pipeline().globalParameters.batchName"
+		},
+		"irisriteshbatchROW_LS_properties_typeProperties_batchUri": {
+			"type": "string",
+			"defaultValue": "https://irisriteshbatchrow.southeastasia.batch.azure.com"
+		},
+		"irisriteshbatchROW_LS_properties_typeProperties_poolName": {
+			"type": "string",
+			"defaultValue": "test"
+		},
+		"irisriteshbatchROW_LS_properties_typeProperties_accountName": {
+			"type": "string",
+			"defaultValue": "irisriteshbatchrow"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "iris-ritesh-eu_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"AzureBlobStorageIrisRitesh_connectionString": {
+						"value": "[parameters('AzureBlobStorageIrisRitesh_connectionString')]"
+					},
+					"AzureDataLakeStorage1_accountKey": {
+						"value": "[parameters('AzureDataLakeStorage1_accountKey')]"
+					},
+					"irisadlsgen2_LS_accountKey": {
+						"value": "[parameters('irisadlsgen2_LS_accountKey')]"
+					},
+					"iris_ritesh_blob_connectionString": {
+						"value": "[parameters('iris_ritesh_blob_connectionString')]"
+					},
+					"AzureContosoKeyVault_properties_typeProperties_baseUrl": {
+						"value": "[parameters('AzureContosoKeyVault_properties_typeProperties_baseUrl')]"
+					},
+					"AzureDataLakeStorage1_properties_typeProperties_url": {
+						"value": "[parameters('AzureDataLakeStorage1_properties_typeProperties_url')]"
+					},
+					"irisadlsgen2_LS_properties_typeProperties_url": {
+						"value": "[parameters('irisadlsgen2_LS_properties_typeProperties_url')]"
+					},
+					"cosmos_iris_powerbi_LS_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('cosmos_iris_powerbi_LS_properties_typeProperties_connectionString_secretName')]"
+					},
+					"irisadlsgen2_LS_EU_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('irisadlsgen2_LS_EU_properties_typeProperties_connectionString_secretName')]"
+					},
+					"irisriteshbatchROW_LS_properties_typeProperties_batchUri": {
+						"value": "[parameters('irisriteshbatchROW_LS_properties_typeProperties_batchUri')]"
+					},
+					"irisriteshbatchROW_LS_properties_typeProperties_poolName": {
+						"value": "[parameters('irisriteshbatchROW_LS_properties_typeProperties_poolName')]"
+					},
+					"irisriteshbatchROW_LS_properties_typeProperties_accountName": {
+						"value": "[parameters('irisriteshbatchROW_LS_properties_typeProperties_accountName')]"
+					},
+					"irisriteshbatchEU_LS_properties_typeProperties_batchUri": {
+						"value": "[parameters('irisriteshbatchEU_LS_properties_typeProperties_batchUri')]"
+					},
+					"irisriteshbatchEU_LS_properties_typeProperties_poolName": {
+						"value": "[parameters('irisriteshbatchEU_LS_properties_typeProperties_poolName')]"
+					},
+					"irisriteshbatchEU_LS_properties_typeProperties_accountName": {
+						"value": "[parameters('irisriteshbatchEU_LS_properties_typeProperties_accountName')]"
+					}
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}

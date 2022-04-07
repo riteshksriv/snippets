@@ -1,0 +1,14 @@
+{
+	"region": {
+		"type": "string",
+		"value": "ROW"
+	},
+	"batchURI": {
+		"type": "string",
+		"value": "https://irisriteshbatchrow.southeastasia.batch.azure.com"
+	},
+	"batchName": {
+		"type": "string",
+		"value": "irisriteshbatchrow"
+	}
+}
