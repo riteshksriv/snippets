@@ -18,15 +18,16 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "43812c28-35db-4bee-82fa-6a4e9d2a49fe"
+				"spark.autotune.trackingId": "a37c5c91-9ca3-490f-b047-7da8aea66543"
 			}
 		},
 		"metadata": {
 			"saveOutput": true,
-			"synapse_widget": {
-				"version": "0.1"
-			},
 			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "python"
+			},
 			"language_info": {
 				"name": "python"
 			},
@@ -37,14 +38,13 @@
 				"endpoint": "https://iris-synapse-ws.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/synapsespark",
 				"auth": {
 					"type": "AAD",
-					"authResource": "https://dev.azuresynapse.net",
-					"authHeader": null
+					"authResource": "https://dev.azuresynapse.net"
 				},
 				"sparkVersion": "3.4",
 				"nodeCount": 10,
 				"cores": 4,
 				"memory": 28,
-				"extraHeader": null
+				"automaticScaleJobs": false
 			},
 			"sessionKeepAliveTimeout": 30
 		},
@@ -58,6 +58,7 @@
 				},
 				"source": [
 					"segment = \"test\"\n",
+					"fragment = \"most\"\n",
 					""
 				],
 				"execution_count": 1
@@ -100,7 +101,8 @@
 					"val  connectionString :  String  =  TokenLibrary.getConnectionString(\"synapsesparkGen2LS\")\n",
 					"println(connectionString)\n",
 					""
-				]
+				],
+				"execution_count": null
 			},
 			{
 				"cell_type": "code",
@@ -120,7 +122,8 @@
 					"//fs.adl.oauth2.access.token.provider com.microsoft.azure.synapse.tokenlibrary.LinkedServiceBasedTokenProviderGen1\n",
 					"//spark.hadoop.storage.synapse.linkedServiceName adls_oceprocc14_torus\n",
 					"//spark.hadoop.fs.adl.oauth2.access.token.provider com.microsoft.azure.synapse.tokenlibrary.LinkedServiceBasedTokenProviderGen1"
-				]
+				],
+				"execution_count": null
 			}
 		]
 	}
