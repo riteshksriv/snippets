@@ -1,0 +1,17 @@
+{
+	"name": "CreateTemp",
+	"properties": {
+		"content": {
+			"query": "SELECT * FROM SegmentStat",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "SegmentCosmosDB",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

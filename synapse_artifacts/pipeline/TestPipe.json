@@ -1,0 +1,51 @@
+{
+	"name": "TestPipe",
+	"properties": {
+		"activities": [
+			{
+				"name": "Notebook1",
+				"type": "SynapseNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebook": {
+						"referenceName": "Test",
+						"type": "NotebookReference"
+					},
+					"parameters": {
+						"segment": {
+							"value": {
+								"value": "@pipeline().parameters.segment",
+								"type": "Expression"
+							},
+							"type": "string"
+						}
+					},
+					"snapshot": true,
+					"conf": {
+						"spark.dynamicAllocation.enabled": null,
+						"spark.dynamicAllocation.minExecutors": null,
+						"spark.dynamicAllocation.maxExecutors": null
+					},
+					"numExecutors": null
+				}
+			}
+		],
+		"parameters": {
+			"segment": {
+				"type": "string",
+				"defaultValue": "testsegmentparam"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-08-31T10:58:45Z"
+	},
+	"type": "Microsoft.Synapse/workspaces/pipelines"
+}

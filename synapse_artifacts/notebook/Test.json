@@ -1,0 +1,127 @@
+{
+	"name": "Test",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "synapsespark",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": true,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "43812c28-35db-4bee-82fa-6a4e9d2a49fe"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"enableDebugMode": false,
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/d1370dbb-34a8-4ef2-bc9b-ed5e1107b75f/resourceGroups/iris-rg/providers/Microsoft.Synapse/workspaces/iris-synapse-ws/bigDataPools/synapsespark",
+				"name": "synapsespark",
+				"type": "Spark",
+				"endpoint": "https://iris-synapse-ws.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/synapsespark",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net",
+					"authHeader": null
+				},
+				"sparkVersion": "3.4",
+				"nodeCount": 10,
+				"cores": 4,
+				"memory": 28,
+				"extraHeader": null
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"metadata": {
+					"tags": [
+						"parameters"
+					]
+				},
+				"source": [
+					"segment = \"test\"\n",
+					""
+				],
+				"execution_count": 1
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"SQL_LINKED_SERVICE = \"AzureSqlDatabase1\"\n",
+					"\n",
+					"# Set the linked service name for SQL authentication\n",
+					"spark.conf.set(\"spark.synapse.linkedServiceName\", SQL_LINKED_SERVICE)\n",
+					"\n",
+					"# JDBC URL format (no credentials needed if using a linked service)\n",
+					"jdbc_url = f\"jdbc:sqlserver://iristestsql.database.windows.net:1433;database=iris-test\"\n",
+					"\n",
+					"\n",
+					"# Read data using the linked service\n",
+					"df = spark.read \\\n",
+					"    .format(\"jdbc\") \\\n",
+					"    .option(\"url\", jdbc_url) \\\n",
+					"    .option(\"dbtable\", \"Customers\") \\\n",
+					"    .option(\"driver\", \"com.microsoft.sqlserver.jdbc.SQLServerDriver\") \\\n",
+					"    .option(\"authentication\", \"ActiveDirectoryMSI\") \\\n",
+					"    .load()\n",
+					"\n",
+					"df.show()"
+				],
+				"execution_count": 10
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"import java.io.FileInputStream;\n",
+					"import java.io.FileOutputStream;\n",
+					"import org.apache.spark.sql.types.{BinaryType, StringType, StructField, StructType}\n",
+					"\n",
+					"import  com.microsoft.azure.synapse.tokenlibrary.TokenLibrary\n",
+					"val sc = spark.sparkContext\n",
+					"\n",
+					"val  connectionString :  String  =  TokenLibrary.getConnectionString(\"synapsesparkGen2LS\")\n",
+					"println(connectionString)\n",
+					""
+				]
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"val sc = spark.sparkContext\n",
+					"spark.conf.set(\"spark.storage.synapse.linkedServiceName\", \"DatasvcProdLS\")\n",
+					"//spark.conf.set(\"fs.azure.account.auth.type\", \"SAS\")\n",
+					"spark.conf.set(\"fs.adl.oauth2.access.token.provider\", \"com.microsoft.azure.synapse.tokenlibrary.LinkedServiceBasedTokenProviderGen1\")\n",
+					"spark.conf.set(\"spark.hadoop.storage.synapse.linkedServiceName\", \"DatasvcProdLS\")\n",
+					"spark.conf.set(\"spark.hadoop.fs.adl.oauth2.access.token.provider\", \"com.microsoft.azure.synapse.tokenlibrary.LinkedServiceBasedTokenProviderGen1\")\n",
+					"System.out.println(\"Output = \" + segment)\n",
+					"//val df = spark.read.format(\"sstream\").load(\"adl://iris-datasvc-prod-c15.azuredatalakestore.net/shares/IDEAs.Prod.Data.Iris/Prepare.Segmentation.Prod/UserData/Segments/Commercial/M365/2021/08/21/SM4UAHKLK27RL8_OBJECTID_0310.ss\")\n",
+					"\n",
+					"//display(df.limit(10))\n",
+					"\n",
+					"//spark.storage.synapse.linkedServiceName adls_oceprocc14_torus\n",
+					"//fs.adl.oauth2.access.token.provider com.microsoft.azure.synapse.tokenlibrary.LinkedServiceBasedTokenProviderGen1\n",
+					"//spark.hadoop.storage.synapse.linkedServiceName adls_oceprocc14_torus\n",
+					"//spark.hadoop.fs.adl.oauth2.access.token.provider com.microsoft.azure.synapse.tokenlibrary.LinkedServiceBasedTokenProviderGen1"
+				]
+			}
+		]
+	}
+}

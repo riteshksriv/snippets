@@ -1,0 +1,357 @@
+{
+	"name": "Anomaly",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "synapsespark",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": true,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "26c83db0-6094-47b5-86ee-52eaa9a8ed9c"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"enableDebugMode": false,
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/d1370dbb-34a8-4ef2-bc9b-ed5e1107b75f/resourceGroups/iris-rg/providers/Microsoft.Synapse/workspaces/iris-synapse-ws/bigDataPools/synapsespark",
+				"name": "synapsespark",
+				"type": "Spark",
+				"endpoint": "https://iris-synapse-ws.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/synapsespark",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net",
+					"authHeader": null
+				},
+				"sparkVersion": "3.4",
+				"nodeCount": 10,
+				"cores": 4,
+				"memory": 28,
+				"extraHeader": null
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"impressions = [\n",
+					"    3614, 964, 771, 3485, 4257, 4104, 3547, 3060, 827, 702,\n",
+					"    3171, 3858, 3788, 3875, 3282, 776, 783, 3347, 3889, 4137,\n",
+					"    3993, 3134, 781, 773, 3530, 4176, 4262, 2922, 1870, 685\n",
+					"]"
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"import pandas as pd\n",
+					"import numpy as np\n",
+					"from sklearn.ensemble import IsolationForest\n",
+					"\n",
+					"def find_anomaly(impressions: list[int]):\n",
+					"    dates = pd.date_range(start='2025-03-10', periods=30, freq='D')\n",
+					"\n",
+					"\n",
+					"    df = pd.DataFrame({\n",
+					"        'ActionDate': dates,\n",
+					"        'Impressions': impressions\n",
+					"    })\n",
+					"\n",
+					"    # Create and fit the Isolation Forest model\n",
+					"    X = np.array(impressions).reshape(-1, 1)\n",
+					"    iso_forest = IsolationForest(contamination='auto', random_state=42)\n",
+					"    preds = iso_forest.fit_predict(X)\n",
+					"    scores = iso_forest.decision_function(X)  # << This is the anomaly score!\n",
+					"\n",
+					"    # Organize\n",
+					"    df = pd.DataFrame({\n",
+					"        'Impressions': impressions,\n",
+					"        'Predicted': preds,\n",
+					"        'AnomalyScore': scores\n",
+					"    })\n",
+					"    normal_impressions = df[df['Predicted'] == 1]['Impressions']\n",
+					"    median_value = normal_impressions.median()\n",
+					"\n",
+					"    def anomaly_type(row):\n",
+					"        if row['Predicted'] == 1:\n",
+					"            return 'normal'\n",
+					"        elif row['Impressions'] < median_value:\n",
+					"            return 'low_anomaly'\n",
+					"        else:\n",
+					"            return 'high_anomaly'\n",
+					"\n",
+					"    df['AnomalyType'] = df.apply(anomaly_type, axis=1)\n",
+					"    return df"
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"from pyspark.sql import functions as F\n",
+					"from pyspark.sql.types import StructType, StructField, BooleanType, DoubleType\n",
+					"import numpy as np\n",
+					"import warnings\n",
+					"from statsmodels.tsa.holtwinters import ExponentialSmoothing\n",
+					"\n",
+					"# 1) Python function to flag anomalies and compute anomaly score\n",
+					"def flag_anomaly_with_score(impressions: list):\n",
+					"    if not impressions or len(impressions) < 8:\n",
+					"        return (False, 0.0)\n",
+					"    \n",
+					"    hist = impressions[:-1]           # training points\n",
+					"    current = impressions[-1]         # point to test\n",
+					"\n",
+					"    # Fit Holt-Winters model\n",
+					"    with warnings.catch_warnings():\n",
+					"        warnings.filterwarnings(\"ignore\")\n",
+					"        model = ExponentialSmoothing(\n",
+					"            hist,\n",
+					"            trend=\"add\",\n",
+					"            seasonal=\"add\",\n",
+					"            seasonal_periods=7\n",
+					"        ).fit(optimized=True,smoothing_level=0.7,smoothing_trend=0.2, smoothing_seasonal=0.1)\n",
+					"        \n",
+					"        forecast = model.forecast(1)[0]\n",
+					"        sigma = np.std(model.resid)\n",
+					"        lower_bound = forecast - 1.96 * sigma\n",
+					"\n",
+					"        # Calculate anomaly flag and score\n",
+					"        is_anomaly = current < lower_bound\n",
+					"        if is_anomaly:\n",
+					"            # anomaly score: how far below the lower bound (normalized)\n",
+					"            score = (lower_bound - current) / sigma if sigma > 0 else 0.0\n",
+					"        else:\n",
+					"            score = 0.0\n",
+					"        \n",
+					"        return (is_anomaly, float(score), current, lower_bound, forecast)\n",
+					"\n",
+					"def flag_anomaly(impressions: list):\n",
+					"    # 2) Define output schema for UDF\n",
+					"    return flag_anomaly_with_score(impressions)\n",
+					""
+				],
+				"execution_count": 5
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"from pyspark.sql import DataFrame, functions as F\n",
+					"\n",
+					"def normalize(df: DataFrame, cv_threshold: float = 0.15) -> DataFrame:\n",
+					"    # Step 1: Add day_of_week and is_weekday based on ActionDate\n",
+					"    df = df.withColumn(\"day_of_week\", F.dayofweek(\"ActionDate\")) \\\n",
+					"           .withColumn(\"is_weekday\", F.col(\"day_of_week\").between(2, 6))\n",
+					"\n",
+					"    # Step 2: Filter weekday rows\n",
+					"    weekday_df = df.filter(F.col(\"is_weekday\") == True)\n",
+					"\n",
+					"    # Step 3: Compute 5th and 95th percentiles per InteractionId\n",
+					"    percentiles = weekday_df.groupBy(\"InteractionId\").agg(\n",
+					"        F.expr(\"percentile_approx(Impressions, 0.05)\").alias(\"p5\"),\n",
+					"        F.expr(\"percentile_approx(Impressions, 0.95)\").alias(\"p95\")\n",
+					"    )\n",
+					"\n",
+					"    # Step 4: Join percentiles back\n",
+					"    weekday_df = weekday_df.join(percentiles, on=\"InteractionId\", how=\"left\")\n",
+					"\n",
+					"    # Step 5: Mark inlier/outlier flags\n",
+					"    weekday_df = weekday_df.withColumn(\n",
+					"        \"is_trimmed\",\n",
+					"        (F.col(\"Impressions\") < F.col(\"p5\")) | (F.col(\"Impressions\") > F.col(\"p95\"))\n",
+					"    )\n",
+					"\n",
+					"    # Step 6: Compute trimmed stats (mean/std) per InteractionId\n",
+					"    trimmed_stats = weekday_df.filter(\"is_trimmed = false\").groupBy(\"InteractionId\").agg(\n",
+					"        F.mean(\"Impressions\").alias(\"trimmed_mean\"),\n",
+					"        F.stddev(\"Impressions\").alias(\"trimmed_std\")\n",
+					"    ).withColumn(\n",
+					"        \"coef_var\", F.col(\"trimmed_std\") / F.col(\"trimmed_mean\")\n",
+					"    )\n",
+					"\n",
+					"    # Step 7: Join all stats back to original df\n",
+					"    df = df.join(percentiles, on=\"InteractionId\", how=\"left\") \\\n",
+					"           .join(trimmed_stats, on=\"InteractionId\", how=\"left\")\n",
+					"\n",
+					"    # Step 8: Create raw impressions column\n",
+					"    df = df.withColumn(\"ImpressionsRaw\", F.col(\"Impressions\"))\n",
+					"\n",
+					"    # Step 9: Normalize impressions only for high-variance weekday outliers\n",
+					"    df = df.withColumn(\n",
+					"        \"Impressions\",\n",
+					"        F.when(\n",
+					"            (F.col(\"is_weekday\") == True) &\n",
+					"            ((F.col(\"ImpressionsRaw\") < F.col(\"p5\")) | (F.col(\"ImpressionsRaw\") > F.col(\"p95\"))) &\n",
+					"            (F.col(\"coef_var\") > cv_threshold),\n",
+					"            (F.col(\"ImpressionsRaw\") - F.col(\"trimmed_mean\")) / F.col(\"trimmed_std\")\n",
+					"        ).otherwise(F.col(\"ImpressionsRaw\"))\n",
+					"    )\n",
+					"\n",
+					"    return df\n",
+					""
+				],
+				"execution_count": 7
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"impressions = [\n",
+					"    244192, 210989, 200650, 168369, 130659, 20073, 25481,\n",
+					"    155303, 138162, 125488, 98403, 79717, 10919, 14202, 111094, 100359, 99715,\n",
+					"    95326, 81281, 12225, 17529, 135597, 119302, 109427, 80291, 31424\n",
+					"]\n",
+					"anom = flag_anomaly(impressions)\n",
+					"print(anom)"
+				],
+				"execution_count": 58
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"impressions = [\n",
+					"    3614, 964, 771, 3485, 4257, 4104, 3547, 3060, 827, 702,\n",
+					"    3171, 3858, 3788, 3875, 3282, 776, 783, 3347, 3889, 4137,\n",
+					"    3993, 3134, 781, 773, 3530, 4176, 4262, 2922, 1870]\n",
+					"anom = flag_anomaly(impressions)\n",
+					"print(anom)"
+				],
+				"execution_count": 62
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"impressions = [\n",
+					"    45075, 43530, 40133, 47925, 68235, 65731, 52373, 53027, 39644, 37181,\n",
+					"    44074, 41054, 62137, 47768, 62603, 59288, 54770, 71104, 68943, 39651,\n",
+					"    39314, 33051, 32918, 33583, 42606, 39622, 39009, 36230, 34008, 8946\n",
+					"]\n",
+					"anom = flag_anomaly(impressions)\n",
+					"print(anom)"
+				],
+				"execution_count": 65
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"impressions = [\n",
+					"    12789, 12336, 11631, 11947, 14528, 19094, 18365, 12439, 12328, 11381, \n",
+					"    12214, 14048, 18506, 17498, 12320, 11718, 6268, 9375, 14610, 19135, \n",
+					"    16353, 9232, 4183, 9383, 9501, 7343, 13697, 12931, 8261\n",
+					"]\n",
+					"anom = flag_anomaly(impressions)\n",
+					"print(anom)"
+				],
+				"execution_count": 67
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"impressions = [\n",
+					"    5840, 6865, 3344, 1111, 7256, 3878, 3101, 2366, 1674, 161, 476,\n",
+					"    2816, 1713, 1389, 1352, 833, 93, 244, 1429, 1037, 703, 531, 652, 75,\n",
+					"    197, 841, 968, 840\n",
+					"]\n",
+					"anom = flag_anomaly(impressions)\n",
+					"print(anom)\n",
+					""
+				],
+				"execution_count": 74
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"impressions = [3608, 962, 756, 3459, 4318, 4028, 3547, 3034, 808, 712, 3117, 3824, 3779, 3825, 3266, 802, 782, 3283, 3972,\n",
+					"4184, 4005, 3088, 790, 747, 3564, 4203, 4288, 2991, 1905]\n",
+					"\n",
+					"anom = flag_anomaly(impressions)\n",
+					"print(anom)"
+				],
+				"execution_count": 76
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"impressions = [5428, 5897, 493, 637, 6984, 8052, 7921, 7972, 6238, 539, 652, 7899, 8314, 8438, 8003, 6627, 575, 659, 8017, 8280, 7972, 6474, 3134]\n",
+					"anom = flag_anomaly(impressions)\n",
+					"print(anom)"
+				],
+				"execution_count": 77
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"impressions = [24700, 7257, 8119, 26356, 28349, 26591, 22646, 21714, 7106, 7947, 23989, 25541, 25541, 25235, 22356, 6742, 7884, 25660, 26570, 27557, 26705, 22105, 6524, 7636, 26506, 27783, 24517, 21645, 16381]\n",
+					"anom = flag_anomaly(impressions)\n",
+					"print(anom)"
+				],
+				"execution_count": 79
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"impressions = [1210, 1243, 103, 146, 1364, 1547, 1675, 1548, 1239, 132, 140, 1573, 1678, 1702, 1509, 1310, 134, 160, 1577, 1739, 1516, 1212, 621]\n",
+					"anom = flag_anomaly(impressions)\n",
+					"print(anom)"
+				],
+				"execution_count": 81
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"impressions =[3276426, 915838, 952450, 3803164, 3412551, 3599762, 3643952, 3276941, 947278, 884513, 3320650, 3688302,\n",
+					"3494893, 3434886, 3089060, 903930, 914968, 3597962, 3949450, 4096102, 3736930, 3051484, 813456, 855914, 3471508, 3726820, 3351211, 2631455]\n",
+					"\n",
+					"anom = flag_anomaly(impressions)\n",
+					"print(anom)"
+				],
+				"execution_count": 84
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"impressions = [228088, 70240, 76418, 287802, 101206, 84393, 105540, 119780, 44212, 49835, 184991, 192758, 156271, 130533,\n",
+					"119304, 40376, 46407, 168063, 186915, 192376, 171835, 139637, 42611, 51519, 196146, 179453, 155381, 123234, 63573]\n",
+					"anom = flag_anomaly(impressions)\n",
+					"print(anom)"
+				],
+				"execution_count": 98
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"anomalyBasePath = \"abfss://azureml@pocmini.dfs.core.windows.net/\"\n",
+					"\n",
+					"file_path = f\"{anomalyBasePath}Anomaly.csv\"\n",
+					"all_anomaly = spark.read.csv(file_path, sep='\\t',  header=True, inferSchema=True)"
+				],
+				"execution_count": 9
+			},
+			{
+				"cell_type": "code",
+				"source": [
+					"all_anomaly.filter(\"\")"
+				],
+				"execution_count": 8
+			}
+		]
+	}
+}

@@ -1,0 +1,60 @@
+{
+	"name": "Speed",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "SmallestPool",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": true,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "ec886106-c5d4-4bce-8fb6-2692ec0aa8be"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1"
+			},
+			"enableDebugMode": false,
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/d1370dbb-34a8-4ef2-bc9b-ed5e1107b75f/resourceGroups/iris-rg/providers/Microsoft.Synapse/workspaces/iris-synapse-ws/bigDataPools/SmallestPool",
+				"name": "SmallestPool",
+				"type": "Spark",
+				"endpoint": "https://iris-synapse-ws.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/SmallestPool",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net",
+					"authHeader": null
+				},
+				"sparkVersion": "3.4",
+				"nodeCount": 10,
+				"cores": 4,
+				"memory": 28,
+				"extraHeader": null
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"source": [
+					"print(\"Hello World\")"
+				]
+			}
+		]
+	}
+}

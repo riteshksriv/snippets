@@ -1,0 +1,26 @@
+{
+	"name": "synapsesparkGen2LS",
+	"type": "Microsoft.Synapse/workspaces/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://irisadlsgen2.dfs.core.windows.net",
+			"tenant": "9a6eae69-8ff2-40b7-87ae-3e9cd2563d50",
+			"servicePrincipalId": "84b110ae-46e1-4815-9552-e79f8b27f196",
+			"servicePrincipalCredentialType": "ServicePrincipalKey",
+			"servicePrincipalCredential": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "AzureKeyVaultLS",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "iris-app-secret"
+			}
+		},
+		"connectVia": {
+			"referenceName": "AutoResolveIntegrationRuntime",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
