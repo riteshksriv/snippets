@@ -1,0 +1,36 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"value": "iris-synapse-ws"
+		},
+		"iris-synapse-ws-WorkspaceDefaultSqlServer_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:iris-synapse-ws.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
+		},
+		"AzureKeyVaultLS_properties_typeProperties_baseUrl": {
+			"value": "https://contosoads-keyvaults.vault.azure.net/"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_server": {
+			"value": "iristestsql.database.windows.net"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_database": {
+			"value": "iris-test"
+		},
+		"contosoads_properties_typeProperties_url": {
+			"value": "https://pocmini.dfs.core.windows.net/"
+		},
+		"iris-synapse-ws-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"value": "https://irisadlsgen2.dfs.core.windows.net"
+		},
+		"synapsesparkGen2LS_properties_typeProperties_url": {
+			"value": "https://irisadlsgen2.dfs.core.windows.net"
+		},
+		"synapsesparkGen2LS_properties_typeProperties_tenant": {
+			"value": "9a6eae69-8ff2-40b7-87ae-3e9cd2563d50"
+		},
+		"synapsesparkGen2LS_properties_typeProperties_servicePrincipalId": {
+			"value": "84b110ae-46e1-4815-9552-e79f8b27f196"
+		}
+	}
+}

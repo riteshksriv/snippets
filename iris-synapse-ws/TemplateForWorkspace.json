@@ -1,0 +1,1221 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"type": "string",
+			"metadata": "Workspace name",
+			"defaultValue": "iris-synapse-ws"
+		},
+		"iris-synapse-ws-WorkspaceDefaultSqlServer_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'iris-synapse-ws-WorkspaceDefaultSqlServer'",
+			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:iris-synapse-ws.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
+		},
+		"AzureKeyVaultLS_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://contosoads-keyvaults.vault.azure.net/"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "iristestsql.database.windows.net"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "iris-test"
+		},
+		"contosoads_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://pocmini.dfs.core.windows.net/"
+		},
+		"iris-synapse-ws-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://irisadlsgen2.dfs.core.windows.net"
+		},
+		"synapsesparkGen2LS_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://irisadlsgen2.dfs.core.windows.net"
+		},
+		"synapsesparkGen2LS_properties_typeProperties_tenant": {
+			"type": "string",
+			"defaultValue": "9a6eae69-8ff2-40b7-87ae-3e9cd2563d50"
+		},
+		"synapsesparkGen2LS_properties_typeProperties_servicePrincipalId": {
+			"type": "string",
+			"defaultValue": "84b110ae-46e1-4815-9552-e79f8b27f196"
+		}
+	},
+	"variables": {
+		"workspaceId": "[concat('Microsoft.Synapse/workspaces/', parameters('workspaceName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('workspaceName'), '/TestPipe')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "Notebook1",
+						"type": "SynapseNotebook",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"notebook": {
+								"referenceName": "Test",
+								"type": "NotebookReference"
+							},
+							"parameters": {
+								"segment": {
+									"value": {
+										"value": "@pipeline().parameters.segment",
+										"type": "Expression"
+									},
+									"type": "string"
+								}
+							},
+							"snapshot": true,
+							"conf": {
+								"spark.dynamicAllocation.enabled": null,
+								"spark.dynamicAllocation.minExecutors": null,
+								"spark.dynamicAllocation.maxExecutors": null
+							},
+							"numExecutors": null
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"segment": {
+						"type": "string",
+						"defaultValue": "testsegmentparam"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2021-08-31T10:58:45Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/notebooks/Test')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AzureKeyVaultLS')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('AzureKeyVaultLS_properties_typeProperties_baseUrl')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AzureSqlDatabase1')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"server": "[parameters('AzureSqlDatabase1_properties_typeProperties_server')]",
+					"database": "[parameters('AzureSqlDatabase1_properties_typeProperties_database')]",
+					"encrypt": "mandatory",
+					"trustServerCertificate": false,
+					"authenticationType": "SystemAssignedManagedIdentity"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/contosoads')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"description": "contosoads",
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('contosoads_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/iris-synapse-ws-WorkspaceDefaultSqlServer')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"parameters": {
+					"DBName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[parameters('iris-synapse-ws-WorkspaceDefaultSqlServer_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/iris-synapse-ws-WorkspaceDefaultStorage')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('iris-synapse-ws-WorkspaceDefaultStorage_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/synapsesparkGen2LS')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('synapsesparkGen2LS_properties_typeProperties_url')]",
+					"tenant": "[parameters('synapsesparkGen2LS_properties_typeProperties_tenant')]",
+					"servicePrincipalId": "[parameters('synapsesparkGen2LS_properties_typeProperties_servicePrincipalId')]",
+					"servicePrincipalCredentialType": "ServicePrincipalKey",
+					"servicePrincipalCredential": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "AzureKeyVaultLS",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "iris-app-secret"
+					}
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]",
+				"[concat(variables('workspaceId'), '/linkedServices/AzureKeyVaultLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AutoResolveIntegrationRuntime')]",
+			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 0
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/UAMICred')]",
+			"type": "Microsoft.Synapse/workspaces/credentials",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "ManagedIdentity",
+				"typeProperties": {
+					"resourceId": "/subscriptions/d1370dbb-34a8-4ef2-bc9b-ed5e1107b75f/resourceGroups/iris-test/providers/Microsoft.ManagedIdentity/userAssignedIdentities/User-Assigned-MI-Common"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/WorkspaceSystemIdentity')]",
+			"type": "Microsoft.Synapse/workspaces/credentials",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "ManagedIdentity",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/CreateTemp')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "SELECT * FROM SegmentStat",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "SegmentCosmosDB",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Anomaly')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "synapsespark",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "28g",
+					"driverCores": 4,
+					"executorMemory": "28g",
+					"executorCores": 4,
+					"numExecutors": 2,
+					"runAsWorkspaceSystemIdentity": true,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "26c83db0-6094-47b5-86ee-52eaa9a8ed9c"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"synapse_widget": {
+						"version": "0.1"
+					},
+					"enableDebugMode": false,
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/d1370dbb-34a8-4ef2-bc9b-ed5e1107b75f/resourceGroups/iris-rg/providers/Microsoft.Synapse/workspaces/iris-synapse-ws/bigDataPools/synapsespark",
+						"name": "synapsespark",
+						"type": "Spark",
+						"endpoint": "https://iris-synapse-ws.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/synapsespark",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net",
+							"authHeader": null
+						},
+						"sparkVersion": "3.4",
+						"nodeCount": 10,
+						"cores": 4,
+						"memory": 28,
+						"extraHeader": null
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"source": [
+							"impressions = [\n",
+							"    3614, 964, 771, 3485, 4257, 4104, 3547, 3060, 827, 702,\n",
+							"    3171, 3858, 3788, 3875, 3282, 776, 783, 3347, 3889, 4137,\n",
+							"    3993, 3134, 781, 773, 3530, 4176, 4262, 2922, 1870, 685\n",
+							"]"
+						],
+						"outputs": [],
+						"execution_count": 3
+					},
+					{
+						"cell_type": "code",
+						"source": [
+							"import pandas as pd\n",
+							"import numpy as np\n",
+							"from sklearn.ensemble import IsolationForest\n",
+							"\n",
+							"def find_anomaly(impressions: list[int]):\n",
+							"    dates = pd.date_range(start='2025-03-10', periods=30, freq='D')\n",
+							"\n",
+							"\n",
+							"    df = pd.DataFrame({\n",
+							"        'ActionDate': dates,\n",
+							"        'Impressions': impressions\n",
+							"    })\n",
+							"\n",
+							"    # Create and fit the Isolation Forest model\n",
+							"    X = np.array(impressions).reshape(-1, 1)\n",
+							"    iso_forest = IsolationForest(contamination='auto', random_state=42)\n",
+							"    preds = iso_forest.fit_predict(X)\n",
+							"    scores = iso_forest.decision_function(X)  # << This is the anomaly score!\n",
+							"\n",
+							"    # Organize\n",
+							"    df = pd.DataFrame({\n",
+							"        'Impressions': impressions,\n",
+							"        'Predicted': preds,\n",
+							"        'AnomalyScore': scores\n",
+							"    })\n",
+							"    normal_impressions = df[df['Predicted'] == 1]['Impressions']\n",
+							"    median_value = normal_impressions.median()\n",
+							"\n",
+							"    def anomaly_type(row):\n",
+							"        if row['Predicted'] == 1:\n",
+							"            return 'normal'\n",
+							"        elif row['Impressions'] < median_value:\n",
+							"            return 'low_anomaly'\n",
+							"        else:\n",
+							"            return 'high_anomaly'\n",
+							"\n",
+							"    df['AnomalyType'] = df.apply(anomaly_type, axis=1)\n",
+							"    return df"
+						],
+						"outputs": [],
+						"execution_count": 4
+					},
+					{
+						"cell_type": "code",
+						"source": [
+							"from pyspark.sql import functions as F\n",
+							"from pyspark.sql.types import StructType, StructField, BooleanType, DoubleType\n",
+							"import numpy as np\n",
+							"import warnings\n",
+							"from statsmodels.tsa.holtwinters import ExponentialSmoothing\n",
+							"\n",
+							"# 1) Python function to flag anomalies and compute anomaly score\n",
+							"def flag_anomaly_with_score(impressions: list):\n",
+							"    if not impressions or len(impressions) < 8:\n",
+							"        return (False, 0.0)\n",
+							"    \n",
+							"    hist = impressions[:-1]           # training points\n",
+							"    current = impressions[-1]         # point to test\n",
+							"\n",
+							"    # Fit Holt-Winters model\n",
+							"    with warnings.catch_warnings():\n",
+							"        warnings.filterwarnings(\"ignore\")\n",
+							"        model = ExponentialSmoothing(\n",
+							"            hist,\n",
+							"            trend=\"add\",\n",
+							"            seasonal=\"add\",\n",
+							"            seasonal_periods=7\n",
+							"        ).fit(optimized=True,smoothing_level=0.7,smoothing_trend=0.2, smoothing_seasonal=0.1)\n",
+							"        \n",
+							"        forecast = model.forecast(1)[0]\n",
+							"        sigma = np.std(model.resid)\n",
+							"        lower_bound = forecast - 1.96 * sigma\n",
+							"\n",
+							"        # Calculate anomaly flag and score\n",
+							"        is_anomaly = current < lower_bound\n",
+							"        if is_anomaly:\n",
+							"            # anomaly score: how far below the lower bound (normalized)\n",
+							"            score = (lower_bound - current) / sigma if sigma > 0 else 0.0\n",
+							"        else:\n",
+							"            score = 0.0\n",
+							"        \n",
+							"        return (is_anomaly, float(score), current, lower_bound, forecast)\n",
+							"\n",
+							"def flag_anomaly(impressions: list):\n",
+							"    # 2) Define output schema for UDF\n",
+							"    return flag_anomaly_with_score(impressions)\n",
+							""
+						],
+						"outputs": [],
+						"execution_count": 5
+					},
+					{
+						"cell_type": "code",
+						"source": [
+							"from pyspark.sql import DataFrame, functions as F\n",
+							"\n",
+							"def normalize(df: DataFrame, cv_threshold: float = 0.15) -> DataFrame:\n",
+							"    # Step 1: Add day_of_week and is_weekday based on ActionDate\n",
+							"    df = df.withColumn(\"day_of_week\", F.dayofweek(\"ActionDate\")) \\\n",
+							"           .withColumn(\"is_weekday\", F.col(\"day_of_week\").between(2, 6))\n",
+							"\n",
+							"    # Step 2: Filter weekday rows\n",
+							"    weekday_df = df.filter(F.col(\"is_weekday\") == True)\n",
+							"\n",
+							"    # Step 3: Compute 5th and 95th percentiles per InteractionId\n",
+							"    percentiles = weekday_df.groupBy(\"InteractionId\").agg(\n",
+							"        F.expr(\"percentile_approx(Impressions, 0.05)\").alias(\"p5\"),\n",
+							"        F.expr(\"percentile_approx(Impressions, 0.95)\").alias(\"p95\")\n",
+							"    )\n",
+							"\n",
+							"    # Step 4: Join percentiles back\n",
+							"    weekday_df = weekday_df.join(percentiles, on=\"InteractionId\", how=\"left\")\n",
+							"\n",
+							"    # Step 5: Mark inlier/outlier flags\n",
+							"    weekday_df = weekday_df.withColumn(\n",
+							"        \"is_trimmed\",\n",
+							"        (F.col(\"Impressions\") < F.col(\"p5\")) | (F.col(\"Impressions\") > F.col(\"p95\"))\n",
+							"    )\n",
+							"\n",
+							"    # Step 6: Compute trimmed stats (mean/std) per InteractionId\n",
+							"    trimmed_stats = weekday_df.filter(\"is_trimmed = false\").groupBy(\"InteractionId\").agg(\n",
+							"        F.mean(\"Impressions\").alias(\"trimmed_mean\"),\n",
+							"        F.stddev(\"Impressions\").alias(\"trimmed_std\")\n",
+							"    ).withColumn(\n",
+							"        \"coef_var\", F.col(\"trimmed_std\") / F.col(\"trimmed_mean\")\n",
+							"    )\n",
+							"\n",
+							"    # Step 7: Join all stats back to original df\n",
+							"    df = df.join(percentiles, on=\"InteractionId\", how=\"left\") \\\n",
+							"           .join(trimmed_stats, on=\"InteractionId\", how=\"left\")\n",
+							"\n",
+							"    # Step 8: Create raw impressions column\n",
+							"    df = df.withColumn(\"ImpressionsRaw\", F.col(\"Impressions\"))\n",
+							"\n",
+							"    # Step 9: Normalize impressions only for high-variance weekday outliers\n",
+							"    df = df.withColumn(\n",
+							"        \"Impressions\",\n",
+							"        F.when(\n",
+							"            (F.col(\"is_weekday\") == True) &\n",
+							"            ((F.col(\"ImpressionsRaw\") < F.col(\"p5\")) | (F.col(\"ImpressionsRaw\") > F.col(\"p95\"))) &\n",
+							"            (F.col(\"coef_var\") > cv_threshold),\n",
+							"            (F.col(\"ImpressionsRaw\") - F.col(\"trimmed_mean\")) / F.col(\"trimmed_std\")\n",
+							"        ).otherwise(F.col(\"ImpressionsRaw\"))\n",
+							"    )\n",
+							"\n",
+							"    return df\n",
+							""
+						],
+						"outputs": [],
+						"execution_count": 7
+					},
+					{
+						"cell_type": "code",
+						"source": [
+							"impressions = [\n",
+							"    244192, 210989, 200650, 168369, 130659, 20073, 25481,\n",
+							"    155303, 138162, 125488, 98403, 79717, 10919, 14202, 111094, 100359, 99715,\n",
+							"    95326, 81281, 12225, 17529, 135597, 119302, 109427, 80291, 31424\n",
+							"]\n",
+							"anom = flag_anomaly(impressions)\n",
+							"print(anom)"
+						],
+						"outputs": [],
+						"execution_count": 58
+					},
+					{
+						"cell_type": "code",
+						"source": [
+							"impressions = [\n",
+							"    3614, 964, 771, 3485, 4257, 4104, 3547, 3060, 827, 702,\n",
+							"    3171, 3858, 3788, 3875, 3282, 776, 783, 3347, 3889, 4137,\n",
+							"    3993, 3134, 781, 773, 3530, 4176, 4262, 2922, 1870]\n",
+							"anom = flag_anomaly(impressions)\n",
+							"print(anom)"
+						],
+						"outputs": [],
+						"execution_count": 62
+					},
+					{
+						"cell_type": "code",
+						"source": [
+							"impressions = [\n",
+							"    45075, 43530, 40133, 47925, 68235, 65731, 52373, 53027, 39644, 37181,\n",
+							"    44074, 41054, 62137, 47768, 62603, 59288, 54770, 71104, 68943, 39651,\n",
+							"    39314, 33051, 32918, 33583, 42606, 39622, 39009, 36230, 34008, 8946\n",
+							"]\n",
+							"anom = flag_anomaly(impressions)\n",
+							"print(anom)"
+						],
+						"outputs": [],
+						"execution_count": 65
+					},
+					{
+						"cell_type": "code",
+						"source": [
+							"impressions = [\n",
+							"    12789, 12336, 11631, 11947, 14528, 19094, 18365, 12439, 12328, 11381, \n",
+							"    12214, 14048, 18506, 17498, 12320, 11718, 6268, 9375, 14610, 19135, \n",
+							"    16353, 9232, 4183, 9383, 9501, 7343, 13697, 12931, 8261\n",
+							"]\n",
+							"anom = flag_anomaly(impressions)\n",
+							"print(anom)"
+						],
+						"outputs": [],
+						"execution_count": 67
+					},
+					{
+						"cell_type": "code",
+						"source": [
+							"impressions = [\n",
+							"    5840, 6865, 3344, 1111, 7256, 3878, 3101, 2366, 1674, 161, 476,\n",
+							"    2816, 1713, 1389, 1352, 833, 93, 244, 1429, 1037, 703, 531, 652, 75,\n",
+							"    197, 841, 968, 840\n",
+							"]\n",
+							"anom = flag_anomaly(impressions)\n",
+							"print(anom)\n",
+							""
+						],
+						"outputs": [],
+						"execution_count": 74
+					},
+					{
+						"cell_type": "code",
+						"source": [
+							"impressions = [3608, 962, 756, 3459, 4318, 4028, 3547, 3034, 808, 712, 3117, 3824, 3779, 3825, 3266, 802, 782, 3283, 3972,\n",
+							"4184, 4005, 3088, 790, 747, 3564, 4203, 4288, 2991, 1905]\n",
+							"\n",
+							"anom = flag_anomaly(impressions)\n",
+							"print(anom)"
+						],
+						"outputs": [],
+						"execution_count": 76
+					},
+					{
+						"cell_type": "code",
+						"source": [
+							"impressions = [5428, 5897, 493, 637, 6984, 8052, 7921, 7972, 6238, 539, 652, 7899, 8314, 8438, 8003, 6627, 575, 659, 8017, 8280, 7972, 6474, 3134]\n",
+							"anom = flag_anomaly(impressions)\n",
+							"print(anom)"
+						],
+						"outputs": [],
+						"execution_count": 77
+					},
+					{
+						"cell_type": "code",
+						"source": [
+							"impressions = [24700, 7257, 8119, 26356, 28349, 26591, 22646, 21714, 7106, 7947, 23989, 25541, 25541, 25235, 22356, 6742, 7884, 25660, 26570, 27557, 26705, 22105, 6524, 7636, 26506, 27783, 24517, 21645, 16381]\n",
+							"anom = flag_anomaly(impressions)\n",
+							"print(anom)"
+						],
+						"outputs": [],
+						"execution_count": 79
+					},
+					{
+						"cell_type": "code",
+						"source": [
+							"impressions = [1210, 1243, 103, 146, 1364, 1547, 1675, 1548, 1239, 132, 140, 1573, 1678, 1702, 1509, 1310, 134, 160, 1577, 1739, 1516, 1212, 621]\n",
+							"anom = flag_anomaly(impressions)\n",
+							"print(anom)"
+						],
+						"outputs": [],
+						"execution_count": 81
+					},
+					{
+						"cell_type": "code",
+						"source": [
+							"impressions =[3276426, 915838, 952450, 3803164, 3412551, 3599762, 3643952, 3276941, 947278, 884513, 3320650, 3688302,\n",
+							"3494893, 3434886, 3089060, 903930, 914968, 3597962, 3949450, 4096102, 3736930, 3051484, 813456, 855914, 3471508, 3726820, 3351211, 2631455]\n",
+							"\n",
+							"anom = flag_anomaly(impressions)\n",
+							"print(anom)"
+						],
+						"outputs": [],
+						"execution_count": 84
+					},
+					{
+						"cell_type": "code",
+						"source": [
+							"impressions = [228088, 70240, 76418, 287802, 101206, 84393, 105540, 119780, 44212, 49835, 184991, 192758, 156271, 130533,\n",
+							"119304, 40376, 46407, 168063, 186915, 192376, 171835, 139637, 42611, 51519, 196146, 179453, 155381, 123234, 63573]\n",
+							"anom = flag_anomaly(impressions)\n",
+							"print(anom)"
+						],
+						"outputs": [],
+						"execution_count": 98
+					},
+					{
+						"cell_type": "code",
+						"source": [
+							"anomalyBasePath = \"abfss://azureml@pocmini.dfs.core.windows.net/\"\n",
+							"\n",
+							"file_path = f\"{anomalyBasePath}Anomaly.csv\"\n",
+							"all_anomaly = spark.read.csv(file_path, sep='\\t',  header=True, inferSchema=True)"
+						],
+						"outputs": [],
+						"execution_count": 9
+					},
+					{
+						"cell_type": "code",
+						"source": [
+							"all_anomaly.filter(\"\")"
+						],
+						"outputs": [],
+						"execution_count": 8
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Speed')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "SmallestPool",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "28g",
+					"driverCores": 4,
+					"executorMemory": "28g",
+					"executorCores": 4,
+					"numExecutors": 2,
+					"runAsWorkspaceSystemIdentity": true,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "ec886106-c5d4-4bce-8fb6-2692ec0aa8be"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"synapse_widget": {
+						"version": "0.1"
+					},
+					"enableDebugMode": false,
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/d1370dbb-34a8-4ef2-bc9b-ed5e1107b75f/resourceGroups/iris-rg/providers/Microsoft.Synapse/workspaces/iris-synapse-ws/bigDataPools/SmallestPool",
+						"name": "SmallestPool",
+						"type": "Spark",
+						"endpoint": "https://iris-synapse-ws.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/SmallestPool",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net",
+							"authHeader": null
+						},
+						"sparkVersion": "3.4",
+						"nodeCount": 10,
+						"cores": 4,
+						"memory": 28,
+						"extraHeader": null
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"source": [
+							"print(\"Hello World\")"
+						],
+						"outputs": []
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Test')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "synapsespark",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "28g",
+					"driverCores": 4,
+					"executorMemory": "28g",
+					"executorCores": 4,
+					"numExecutors": 2,
+					"runAsWorkspaceSystemIdentity": true,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "43812c28-35db-4bee-82fa-6a4e9d2a49fe"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"synapse_widget": {
+						"version": "0.1"
+					},
+					"enableDebugMode": false,
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/d1370dbb-34a8-4ef2-bc9b-ed5e1107b75f/resourceGroups/iris-rg/providers/Microsoft.Synapse/workspaces/iris-synapse-ws/bigDataPools/synapsespark",
+						"name": "synapsespark",
+						"type": "Spark",
+						"endpoint": "https://iris-synapse-ws.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/synapsespark",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net",
+							"authHeader": null
+						},
+						"sparkVersion": "3.4",
+						"nodeCount": 10,
+						"cores": 4,
+						"memory": 28,
+						"extraHeader": null
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"metadata": {
+							"tags": [
+								"parameters"
+							]
+						},
+						"source": [
+							"segment = \"test\"\n",
+							""
+						],
+						"outputs": [],
+						"execution_count": 1
+					},
+					{
+						"cell_type": "code",
+						"source": [
+							"SQL_LINKED_SERVICE = \"AzureSqlDatabase1\"\n",
+							"\n",
+							"# Set the linked service name for SQL authentication\n",
+							"spark.conf.set(\"spark.synapse.linkedServiceName\", SQL_LINKED_SERVICE)\n",
+							"\n",
+							"# JDBC URL format (no credentials needed if using a linked service)\n",
+							"jdbc_url = f\"jdbc:sqlserver://iristestsql.database.windows.net:1433;database=iris-test\"\n",
+							"\n",
+							"\n",
+							"# Read data using the linked service\n",
+							"df = spark.read \\\n",
+							"    .format(\"jdbc\") \\\n",
+							"    .option(\"url\", jdbc_url) \\\n",
+							"    .option(\"dbtable\", \"Customers\") \\\n",
+							"    .option(\"driver\", \"com.microsoft.sqlserver.jdbc.SQLServerDriver\") \\\n",
+							"    .option(\"authentication\", \"ActiveDirectoryMSI\") \\\n",
+							"    .load()\n",
+							"\n",
+							"df.show()"
+						],
+						"outputs": [],
+						"execution_count": 10
+					},
+					{
+						"cell_type": "code",
+						"source": [
+							"import java.io.FileInputStream;\n",
+							"import java.io.FileOutputStream;\n",
+							"import org.apache.spark.sql.types.{BinaryType, StringType, StructField, StructType}\n",
+							"\n",
+							"import  com.microsoft.azure.synapse.tokenlibrary.TokenLibrary\n",
+							"val sc = spark.sparkContext\n",
+							"\n",
+							"val  connectionString :  String  =  TokenLibrary.getConnectionString(\"synapsesparkGen2LS\")\n",
+							"println(connectionString)\n",
+							""
+						],
+						"outputs": []
+					},
+					{
+						"cell_type": "code",
+						"source": [
+							"val sc = spark.sparkContext\n",
+							"spark.conf.set(\"spark.storage.synapse.linkedServiceName\", \"DatasvcProdLS\")\n",
+							"//spark.conf.set(\"fs.azure.account.auth.type\", \"SAS\")\n",
+							"spark.conf.set(\"fs.adl.oauth2.access.token.provider\", \"com.microsoft.azure.synapse.tokenlibrary.LinkedServiceBasedTokenProviderGen1\")\n",
+							"spark.conf.set(\"spark.hadoop.storage.synapse.linkedServiceName\", \"DatasvcProdLS\")\n",
+							"spark.conf.set(\"spark.hadoop.fs.adl.oauth2.access.token.provider\", \"com.microsoft.azure.synapse.tokenlibrary.LinkedServiceBasedTokenProviderGen1\")\n",
+							"System.out.println(\"Output = \" + segment)\n",
+							"//val df = spark.read.format(\"sstream\").load(\"adl://iris-datasvc-prod-c15.azuredatalakestore.net/shares/IDEAs.Prod.Data.Iris/Prepare.Segmentation.Prod/UserData/Segments/Commercial/M365/2021/08/21/SM4UAHKLK27RL8_OBJECTID_0310.ss\")\n",
+							"\n",
+							"//display(df.limit(10))\n",
+							"\n",
+							"//spark.storage.synapse.linkedServiceName adls_oceprocc14_torus\n",
+							"//fs.adl.oauth2.access.token.provider com.microsoft.azure.synapse.tokenlibrary.LinkedServiceBasedTokenProviderGen1\n",
+							"//spark.hadoop.storage.synapse.linkedServiceName adls_oceprocc14_torus\n",
+							"//spark.hadoop.fs.adl.oauth2.access.token.provider com.microsoft.azure.synapse.tokenlibrary.LinkedServiceBasedTokenProviderGen1"
+						],
+						"outputs": []
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ThetaSketch')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "synapse2spark",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "28g",
+					"driverCores": 4,
+					"executorMemory": "28g",
+					"executorCores": 4,
+					"numExecutors": 2,
+					"runAsWorkspaceSystemIdentity": false,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "e69fc91a-e1a9-482a-b010-e2cd31fcc907"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"enableDebugMode": false,
+					"kernelspec": {
+						"name": "synapse_spark",
+						"display_name": "scala"
+					},
+					"language_info": {
+						"name": "scala"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/d1370dbb-34a8-4ef2-bc9b-ed5e1107b75f/resourceGroups/iris-rg/providers/Microsoft.Synapse/workspaces/iris-synapse-ws/bigDataPools/synapse2spark",
+						"name": "synapse2spark",
+						"type": "Spark",
+						"endpoint": "https://iris-synapse-ws.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/synapse2spark",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net"
+						},
+						"sparkVersion": "2.4",
+						"nodeCount": 3,
+						"cores": 4,
+						"memory": 28,
+						"automaticScaleJobs": false
+					},
+					"sessionKeepAliveTimeout": 15
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"metadata": {},
+						"source": [
+							"\r\n",
+							"import java.io.ObjectInputStream\r\n",
+							"import java.io.ObjectOutputStream\r\n",
+							"import java.io.IOException\r\n",
+							"import java.io.Serializable\r\n",
+							"import org.apache.datasketches.theta.Sketch\r\n",
+							"import org.apache.datasketches.theta.UpdateSketch\r\n",
+							"import org.apache.datasketches.theta.CompactSketch\r\n",
+							"import org.apache.datasketches.theta.Sketches\r\n",
+							"import org.apache.datasketches.memory.Memory\r\n",
+							"\r\n",
+							"\r\n",
+							"class ThetaSketchJavaSerializable() extends Serializable {\r\n",
+							"  private var sketch:Sketch = null;\r\n",
+							"  def this(sketch: Sketch) {\r\n",
+							"    this()\r\n",
+							"    this.sketch = sketch\r\n",
+							"    this.sett = 2;\r\n",
+							"  }\r\n",
+							"\r\n",
+							"  def getSketch: Sketch = sketch\r\n",
+							"\r\n",
+							"  def getCompactSketch: CompactSketch = {\r\n",
+							"    if (sketch == null) return null\r\n",
+							"    if (sketch.isInstanceOf[UpdateSketch]) return sketch.asInstanceOf[UpdateSketch].compact\r\n",
+							"    sketch.asInstanceOf[CompactSketch]\r\n",
+							"  }\r\n",
+							"\r\n",
+							"  def update(value: String): Unit = {\r\n",
+							"    if (sketch == null) sketch = UpdateSketch.builder.build\r\n",
+							"    if (sketch.isInstanceOf[UpdateSketch]) sketch.asInstanceOf[UpdateSketch].update(value)\r\n",
+							"    else throw new RuntimeException(\"update() on read-only sketch\")\r\n",
+							"  }\r\n",
+							"\r\n",
+							"  def getEstimate: Double = {\r\n",
+							"    if (sketch == null) return 0.0\r\n",
+							"    sketch.getEstimate\r\n",
+							"  }\r\n",
+							"\r\n",
+							"  @throws[IOException]\r\n",
+							"  private def writeObject(out: ObjectOutputStream): Unit = {\r\n",
+							"    if (sketch == null) {\r\n",
+							"      out.writeInt(0)\r\n",
+							"      return\r\n",
+							"    }\r\n",
+							"    val serializedSketchBytes = sketch.asInstanceOf[UpdateSketch].compact().toByteArray\r\n",
+							"    out.writeInt(serializedSketchBytes.length)\r\n",
+							"    out.write(serializedSketchBytes)\r\n",
+							"  }\r\n",
+							"\r\n",
+							"  @throws[IOException]\r\n",
+							"  @throws[ClassNotFoundException]\r\n",
+							"  private def readObject(in: ObjectInputStream): Unit = {\r\n",
+							"    val length = in.readInt\r\n",
+							"    if (length == 0) return\r\n",
+							"    val serializedSketchBytes = new Array[Byte](length)\r\n",
+							"    in.readFully(serializedSketchBytes)\r\n",
+							"    sketch = Sketches.wrapSketch(Memory.wrap(serializedSketchBytes))\r\n",
+							"  }\r\n",
+							"}"
+						],
+						"outputs": [],
+						"execution_count": 1
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"collapsed": true
+						},
+						"source": [
+							"import org.apache.spark.sql.{DataFrame, Dataset, Encoder, Encoders, Row, SparkSession}\r\n",
+							"import org.apache.spark.api.java.function.MapPartitionsFunction\r\n",
+							"import org.apache.spark.api.java.function.ReduceFunction\r\n",
+							"import org.apache.datasketches.theta.SetOperation\r\n",
+							"import org.apache.datasketches.theta.UpdateSketch\r\n",
+							"import org.apache.datasketches.theta.PairwiseSetOperations\r\n",
+							"import java.util\r\n",
+							"\r\n",
+							"def computeSketch(data: DataFrame) = {\r\n",
+							"    val mappedData = data.mapPartitions(new MapPartitionsFunction[Row, ThetaSketchJavaSerializable]() {\r\n",
+							"      override def call(it: util.Iterator[Row]): util.Iterator[ThetaSketchJavaSerializable] = {\r\n",
+							"        val sketch = new ThetaSketchJavaSerializable\r\n",
+							"        while ( {\r\n",
+							"          it.hasNext\r\n",
+							"        }) sketch.update(it.next.get(0).asInstanceOf[String])\r\n",
+							"        util.Arrays.asList(sketch).iterator\r\n",
+							"      }\r\n",
+							"    }, Encoders.javaSerialization(classOf[ThetaSketchJavaSerializable]))\r\n",
+							"    val sketch = mappedData.reduce(new ReduceFunction[ThetaSketchJavaSerializable]() {\r\n",
+							"      @throws[Exception]\r\n",
+							"      override def call(sketch1: ThetaSketchJavaSerializable, sketch2: ThetaSketchJavaSerializable): ThetaSketchJavaSerializable = {\r\n",
+							"        if (sketch1.getSketch == null && sketch2.getSketch == null) return new ThetaSketchJavaSerializable(UpdateSketch.builder.build.compact)\r\n",
+							"        if (sketch1.getSketch == null) return sketch2\r\n",
+							"        if (sketch2.getSketch == null) return sketch1\r\n",
+							"        val compactSketch1 = sketch1.getCompactSketch\r\n",
+							"        val compactSketch2 = sketch2.getCompactSketch\r\n",
+							"        new ThetaSketchJavaSerializable(PairwiseSetOperations.union(compactSketch1, compactSketch2))\r\n",
+							"      }\r\n",
+							"    })\r\n",
+							"    sketch\r\n",
+							"  }"
+						],
+						"outputs": [],
+						"execution_count": 2
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"collapsed": true
+						},
+						"source": [
+							"import org.apache.datasketches.theta.Sketches\r\n",
+							"\r\n",
+							"def intersect(sketch1: ThetaSketchJavaSerializable, sketch2: ThetaSketchJavaSerializable): Unit = {\r\n",
+							"    val k = 32768;\r\n",
+							"    val intersection = Sketches.setOperationBuilder.setNominalEntries(k).buildIntersection()\r\n",
+							"    intersection.update(sketch1.getSketch)\r\n",
+							"    intersection.update(sketch2.getSketch)\r\n",
+							"    val intersectionResult = intersection.getResult\r\n",
+							"    System.out.println(\"Unique intersection count: \" + intersectionResult.getEstimate)\r\n",
+							"  }\r\n",
+							"  def printSketchSize(sketch1: ThetaSketchJavaSerializable): Unit = {\r\n",
+							"    val serializedSketchBytes = sketch1.getSketch.compact().toByteArray\r\n",
+							"    System.out.println(\"sketch size\" + serializedSketchBytes.length)\r\n",
+							"  }"
+						],
+						"outputs": [],
+						"execution_count": 3
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							},
+							"collapsed": true
+						},
+						"source": [
+							"// Read input\r\n",
+							"//val streamPath = \"SM4UD805D54ISH_ORGPUIDTENANTID_0510.ss\"\r\n",
+							"val streamPath = \"SM4UB5FCIPRW3O_ORGPUIDTENANTID_0630.ss\"\r\n",
+							"val inputPath = \"/mnt/tmp/test/druid/\" + streamPath // streamPath\r\n",
+							"val firstDf = spark.read.format(\"csv\").load(\"abfss://adlsgen2fs@irisadlsgen2.dfs.core.windows.net/synapse/workspaces/iris-synapse-ws/data/fhvhv_tripdata_2020-06.csv\")\r\n",
+							"val sketch1: ThetaSketchJavaSerializable = computeSketch(firstDf)\r\n",
+							"printSketchSize(sketch1)\r\n",
+							"System.out.println(\"Unique count1: \" + sketch1.getEstimate)\r\n",
+							"\r\n",
+							"\r\n",
+							"//val streamPath2 = \"SM4UDAXP91VEH2_ORGPUIDTENANTID_0350.ss\"\r\n",
+							"val streamPath2 = \"SM4UD805D54ISH_ORGPUIDTENANTID_0510.ss\"\r\n",
+							"val inputPath2 = \"/mnt/tmp/test/druid/\" + streamPath2 // streamPath\r\n",
+							"val secondDf = spark.read.format(\"csv\").load(\"abfss://adlsgen2fs@irisadlsgen2.dfs.core.windows.net/synapse/workspaces/iris-synapse-ws/data/fhvhv_tripdata_2020-11.csv\")\r\n",
+							"val sketch2: ThetaSketchJavaSerializable = computeSketch(secondDf)\r\n",
+							"printSketchSize(sketch2)\r\n",
+							"System.out.println(\"Unique count2: \" + sketch2.getEstimate)\r\n",
+							"\r\n",
+							"intersect(sketch1, sketch2)"
+						],
+						"outputs": [],
+						"execution_count": 4
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/synapse2spark')]",
+			"type": "Microsoft.Synapse/workspaces/bigDataPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"autoPause": {
+					"enabled": true,
+					"delayInMinutes": 15
+				},
+				"autoScale": {
+					"enabled": true,
+					"maxNodeCount": 10,
+					"minNodeCount": 3
+				},
+				"nodeCount": 3,
+				"nodeSize": "Small",
+				"nodeSizeFamily": "MemoryOptimized",
+				"sparkVersion": "2.4",
+				"isComputeIsolationEnabled": false,
+				"sessionLevelPackagesEnabled": true,
+				"customLibraries": [
+					{
+						"name": "structuredstreamforspark_2.11-2.4.0-1.2.0.jar",
+						"path": "iris-synapse-ws/libraries/structuredstreamforspark_2.11-2.4.0-1.2.0.jar",
+						"containerName": "prep",
+						"uploadedTimestamp": "0001-01-01T00:00:00+00:00",
+						"type": "jar"
+					},
+					{
+						"name": "datasketches-java-2.0.0.jar",
+						"path": "iris-synapse-ws/libraries/datasketches-java-2.0.0.jar",
+						"containerName": "prep",
+						"uploadedTimestamp": "0001-01-01T00:00:00+00:00",
+						"type": "jar"
+					},
+					{
+						"name": "datasketches-memory-1.3.0.jar",
+						"path": "iris-synapse-ws/libraries/datasketches-memory-1.3.0.jar",
+						"containerName": "prep",
+						"uploadedTimestamp": "0001-01-01T00:00:00+00:00",
+						"type": "jar"
+					}
+				],
+				"annotations": []
+			},
+			"dependsOn": [],
+			"location": "southeastasia"
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/synapsespark')]",
+			"type": "Microsoft.Synapse/workspaces/bigDataPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"autoPause": {
+					"enabled": true,
+					"delayInMinutes": 15
+				},
+				"autoScale": {
+					"enabled": true,
+					"maxNodeCount": 6,
+					"minNodeCount": 3
+				},
+				"nodeCount": 10,
+				"nodeSize": "Small",
+				"nodeSizeFamily": "MemoryOptimized",
+				"sparkVersion": "3.4",
+				"isComputeIsolationEnabled": false,
+				"sessionLevelPackagesEnabled": false,
+				"annotations": []
+			},
+			"dependsOn": [],
+			"location": "southeastasia"
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SmallestPool')]",
+			"type": "Microsoft.Synapse/workspaces/bigDataPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"autoPause": {
+					"enabled": true,
+					"delayInMinutes": 30
+				},
+				"autoScale": {
+					"enabled": true,
+					"maxNodeCount": 3,
+					"minNodeCount": 3
+				},
+				"nodeCount": 10,
+				"nodeSize": "Small",
+				"nodeSizeFamily": "MemoryOptimized",
+				"sparkVersion": "3.4",
+				"isComputeIsolationEnabled": false,
+				"sessionLevelPackagesEnabled": false,
+				"annotations": []
+			},
+			"dependsOn": [],
+			"location": "southeastasia"
+		}
+	]
+}
