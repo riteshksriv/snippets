@@ -761,15 +761,16 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "43812c28-35db-4bee-82fa-6a4e9d2a49fe"
+						"spark.autotune.trackingId": "c4f0061c-a879-4ee7-9917-89502420d9d4"
 					}
 				},
 				"metadata": {
 					"saveOutput": true,
-					"synapse_widget": {
-						"version": "0.1"
-					},
 					"enableDebugMode": false,
+					"kernelspec": {
+						"name": "synapse_pyspark",
+						"display_name": "python"
+					},
 					"language_info": {
 						"name": "python"
 					},
@@ -780,14 +781,13 @@
 						"endpoint": "https://iris-synapse-ws.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/synapsespark",
 						"auth": {
 							"type": "AAD",
-							"authResource": "https://dev.azuresynapse.net",
-							"authHeader": null
+							"authResource": "https://dev.azuresynapse.net"
 						},
 						"sparkVersion": "3.4",
 						"nodeCount": 10,
 						"cores": 4,
 						"memory": 28,
-						"extraHeader": null
+						"automaticScaleJobs": false
 					},
 					"sessionKeepAliveTimeout": 30
 				},
@@ -801,6 +801,7 @@
 						},
 						"source": [
 							"segment = \"test\"\n",
+							"fragment = \"most\"\n",
 							""
 						],
 						"outputs": [],
@@ -808,6 +809,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"SQL_LINKED_SERVICE = \"AzureSqlDatabase1\"\n",
 							"\n",
@@ -834,6 +836,7 @@
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"import java.io.FileInputStream;\n",
 							"import java.io.FileOutputStream;\n",
@@ -846,10 +849,12 @@
 							"println(connectionString)\n",
 							""
 						],
-						"outputs": []
+						"outputs": [],
+						"execution_count": null
 					},
 					{
 						"cell_type": "code",
+						"metadata": {},
 						"source": [
 							"val sc = spark.sparkContext\n",
 							"spark.conf.set(\"spark.storage.synapse.linkedServiceName\", \"DatasvcProdLS\")\n",
@@ -867,7 +872,8 @@
 							"//spark.hadoop.storage.synapse.linkedServiceName adls_oceprocc14_torus\n",
 							"//spark.hadoop.fs.adl.oauth2.access.token.provider com.microsoft.azure.synapse.tokenlibrary.LinkedServiceBasedTokenProviderGen1"
 						],
-						"outputs": []
+						"outputs": [],
+						"execution_count": null
 					}
 				]
 			},
@@ -895,7 +901,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "e69fc91a-e1a9-482a-b010-e2cd31fcc907"
+						"spark.autotune.trackingId": "b35c2767-85c1-48bb-9ddd-dd29b13e0794"
 					}
 				},
 				"metadata": {
@@ -920,15 +926,13 @@
 						"sparkVersion": "2.4",
 						"nodeCount": 3,
 						"cores": 4,
-						"memory": 28,
-						"automaticScaleJobs": false
+						"memory": 28
 					},
 					"sessionKeepAliveTimeout": 15
 				},
 				"cells": [
 					{
 						"cell_type": "code",
-						"metadata": {},
 						"source": [
 							"\r\n",
 							"import java.io.ObjectInputStream\r\n",
